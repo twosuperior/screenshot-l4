@@ -1,7 +1,5 @@
 <?php namespace Twosuperior\Screenshot;
 
-use \Intervention\Image\Facades;
-
 class Screenshot {
 
 	/**
@@ -14,21 +12,18 @@ class Screenshot {
 		// set up phantomjs
 		$tempJsFileHandle = tmpfile();
 		
+		// get path
+		$screenshot_path = \Config::get('screenshot::screenshot_path') . '/' . md5($url);
+		
 		// ensure folders exists
 		if (!\File::exists(storage_path() . '/temp/')) \File::makeDirectory(storage_path() . '/temp/', 0775);
-		if (!\File::exists(storage_path() . '/screenshots/' . md5($url))) \File::makeDirectory(storage_path() . '/screenshots/' . md5($url), 0775, true);
+		if (!\File::exists($screenshot_path)) \File::makeDirectory($screenshot_path, 0775, true);
 		
 		// set up temp file
 		$temp = storage_path() . '/temp/' . uniqid();
- 
- 	    // remove after end
-	    \App::finish(function($request, $response) use ($temp)
-	    {
-	        unlink($temp);
-	    });
 		
 		// set up final desination
-		$file = storage_path() . '/screenshots/' . md5($url) . '/original.png';
+		$file = $screenshot_path . '/original.png';
 			
 		// build phantomjs command
 		$fileContent= "
@@ -39,24 +34,39 @@ class Screenshot {
 				window.setTimeout(function(){
 					page.render('" . $file . "');
 					phantom.exit();
-				}, 5000);
+				}, " . \Config::get('screenshot::wait_time') . ");
 			});";
 		
 		// temp file created
 		if (file_put_contents($temp, $fileContent))
 		{
 			// execute file
-			$cmd = escapeshellcmd(base_path() . '/bin/phantomjs' . " " . $temp);
+			$cmd = escapeshellcmd(\Config::get('screenshot::phantom_path') . " " . $temp);
 			shell_exec($cmd);
 
 			// start image
-			$image = Image::make($file);
+			$image = \Intervention\Image\Facades\Image::make($file);
 
+			// auto crop image
+			$image->fit(800, 600, null, 'top');
+		
+			// save
+			$image->save($screenshot_path . '/large.png');
+			
+			// auto crop image
+			$image->fit(400, 300, null, 'top');
+		
+			// save
+			$image->save($screenshot_path . '/medium.png');
+			
 			// auto crop image
 			$image->fit(200, 150, null, 'top');
 		
 			// save
-			$image->save(storage_path() . '/screenshots/' . md5($url) . '/200x150.png');
+			$image->save($screenshot_path . '/small.png');
+			
+	 	    // remove after end
+		    if (\File::exists($temp)) \File::delete($temp);
 			
 			// return
 			return md5($url);

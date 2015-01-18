@@ -10,8 +10,11 @@ class ScreenshotTest extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-		//
-	    $app['path.base'] = __DIR__ . '/../src';
+	    $app['path.base'] = realpath(__DIR__ . '/../src');
+	    $app['path.storage'] = realpath(__DIR__ . '/../src/storage');
+		$app['config']->set('screenshot::phantom_path', realpath(__DIR__ . '/../vendor/bin/phantomjs'));
+		$app['config']->set('screenshot::wait_time', 3000);
+		$app['config']->set('screenshot::screenshot_path', __DIR__ . '/../src/storage/screenshots');
     }
 
     /**
@@ -36,14 +39,10 @@ class ScreenshotTest extends \Orchestra\Testbench\TestCase
      */
     public function testTakeScreenshot()
     {
-		echo base_path();
-		exit;
 		// get events
-		$test = \Screenshot::take('http://www.google.co.uk');
-		
-		echo $test;
-		exit;
+		$screenshot = \Screenshot::take('http://www.twosuperior.co.uk');
+
 		// has results
-        // $this->assertTrue(count($events) > 0);
+        $this->assertTrue((bool) $screenshot);
     }
 }
