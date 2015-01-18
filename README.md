@@ -1,8 +1,8 @@
-# Screenshot-L4 API for Laravel
+# Screenshot Package for Laravel 4
 
 ----
 
-Screenshot tool for Laravel 4 using Amazon S3
+Screenshot tool for Laravel 4 using PhantomJS
 
 ----
 
@@ -31,7 +31,7 @@ Add the following to the `providers` array:
 
 	'providers' => array(
 		…
-		'Twosuperior\ScreenshotL4\ScreenshotServiceProvider',
+		'Twosuperior\Screenshot\ScreenshotServiceProvider',
 		…
 	),
 
@@ -39,7 +39,7 @@ Furthermore, add the following the the `aliases` array:
 
 	'aliases' => array(
 		…
-		'Screenshot' => 'Twosuperior\ScreenshotL4\Facades\Screenshot',
+		'Screenshot' => 'Twosuperior\Screenshot\Facades\Screenshot',
 		…
 	),
 
