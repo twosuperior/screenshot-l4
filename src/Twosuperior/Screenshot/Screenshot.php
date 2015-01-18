@@ -13,7 +13,7 @@ class Screenshot {
 		$tempJsFileHandle = tmpfile();
 		
 		// get path
-		$screenshot_path = \Config::get('screenshot::screenshot_path') . '/' . md5($url);
+		$screenshot_path = \Config::get('screenshot::screenshot_path', storage_path('screenshots')) . '/' . md5($url);
 		
 		// ensure folders exists
 		if (!\File::exists(storage_path() . '/temp/')) \File::makeDirectory(storage_path() . '/temp/', 0775);
@@ -34,14 +34,14 @@ class Screenshot {
 				window.setTimeout(function(){
 					page.render('" . $file . "');
 					phantom.exit();
-				}, " . \Config::get('screenshot::wait_time') . ");
+				}, " . \Config::get('screenshot::wait_time', 3000) . ");
 			});";
 		
 		// temp file created
 		if (file_put_contents($temp, $fileContent))
 		{
 			// execute file
-			$cmd = escapeshellcmd(\Config::get('screenshot::phantom_path') . " " . $temp);
+			$cmd = escapeshellcmd(\Config::get('screenshot::phantom_path', base_path('vendor/bin/phantomjs')) . " " . $temp);
 			shell_exec($cmd);
 
 			// start image
